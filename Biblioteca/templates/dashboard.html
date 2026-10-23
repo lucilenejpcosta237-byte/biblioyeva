@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-6">Olá, {{ user['name'].split()[0] }} 👋</h1>
+
+{% if is_admin %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-slate-500 mb-1">Total de Livros</p>
+            <h2 class="text-3xl font-bold text-slate-900">{{ stats.livros }}</h2>
+        </div>
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-slate-500 mb-1">Empréstimos Ativos</p>
+            <h2 class="text-3xl font-bold text-emerald-600">{{ stats.emprestimos }}</h2>
+        </div>
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        </div>
+    </div>
+    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+        <div>
+            <p class="text-sm font-medium text-slate-500 mb-1">Alunos Cadastrados</p>
+            <h2 class="text-3xl font-bold text-slate-900">{{ stats.alunos }}</h2>
+        </div>
+        <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </div>
+    </div>
+</div>
+<div class="text-center mt-10">
+    <a href="{{ url_for('admin') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all">
+        Ir para o Painel de Controle
+    </a>
+</div>
+
+{% else %}
+<!-- ALUNO -->
+<h2 class="text-lg font-bold text-slate-800 mb-4">Seus Livros Emprestados</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for l in loans %}
+    <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex gap-4">
+        <img src="{{ l.cover_url }}" class="w-20 h-28 object-cover rounded-lg shadow-sm">
+        <div class="flex flex-col flex-1 justify-between">
+            <div>
+                <h3 class="font-bold text-slate-900 line-clamp-1">{{ l.title }}</h3>
+                <p class="text-xs text-slate-500 mb-2">{{ l.author }}</p>
+                <span class="inline-flex items-center px-2 py-1 rounded text-xs font-semibold {% if l.due_date < now %}bg-rose-100 text-rose-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                    Devolver: {{ l.due_date[:10] }}
+                </span>
+            </div>
+            <form method="POST" action="{{ url_for('return_loan', loan_id=l.id) }}" class="mt-2 text-right">
+                <button type="submit" class="text-sm text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">Devolver Livro</button>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-full bg-white rounded-2xl p-8 border border-slate-100 shadow-sm text-center">
+        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">Você não tem empréstimos ativos</h3>
+        <p class="text-slate-500 mb-4">Que tal explorar o acervo e pegar um livro novo?</p>
+        <a href="{{ url_for('catalog') }}" class="inline-block bg-slate-900 hover:bg-slate-800 text-white px-6 py-2 rounded-xl text-sm font-medium transition-colors">
+            Ver Catálogo
+        </a>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

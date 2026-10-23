@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-2xl font-bold text-slate-900 mb-6">Painel de Controle</h1>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Coluna Esquerda: Formulários -->
+    <div class="space-y-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Cadastrar Livro</h2>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="add_book">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Título</label>
+                    <input type="text" name="title" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Autor</label>
+                    <input type="text" name="author" required class="w-full px-3 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Categoria</label>
+                        <input type="text" name="category" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Cópias</label>
+                        <input type="number" name="copies" value="1" min="1" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">URL da Capa</label>
+                    <input type="url" name="cover_url" placeholder="https://..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Sinopse</label>
+                    <textarea name="synopsis" rows="3" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">Cadastrar Livro</button>
+            </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">Cadastrar Aluno</h2>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="action" value="add_user">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nome Completo</label>
+                    <input type="text" name="name" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Usuário</label>
+                        <input type="text" name="username" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Senha</label>
+                        <input type="password" name="password" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Turma</label>
+                    <input type="text" name="class_name" placeholder="Ex: 9º Ano A" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">Cadastrar Aluno</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Coluna Direita: Tabelas -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">Empréstimos Ativos</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="p-4 border-b">Livro</th>
+                            <th class="p-4 border-b">Aluno</th>
+                            <th class="p-4 border-b">Prazo</th>
+                            <th class="p-4 border-b">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        {% for l in loans %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">{{ l.title }}</td>
+                            <td class="p-4 text-slate-600">{{ l.user_name }} <span class="text-xs text-slate-400 block">{{ l.class_name }}</span></td>
+                            <td class="p-4">
+                                <span class="{% if l.due_date < now %}text-rose-600 font-bold{% else %}text-slate-600{% endif %}">
+                                    {{ l.due_date[:10] }}
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <form method="POST" action="{{ url_for('return_loan', loan_id=l.id) }}">
+                                    <button type="submit" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs uppercase tracking-wide">Receber</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="4" class="p-4 text-center text-slate-500">Nenhum empréstimo ativo.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-slate-100 bg-slate-50">
+                <h2 class="text-lg font-bold text-slate-800">Alunos Cadastrados</h2>
+            </div>
+            <div class="overflow-x-auto max-h-96">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white text-xs font-semibold text-slate-500 uppercase tracking-wider sticky top-0">
+                            <th class="p-4 border-b">Nome</th>
+                            <th class="p-4 border-b">Usuário</th>
+                            <th class="p-4 border-b">Turma</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm">
+                        {% for u in users %}
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 font-medium text-slate-800">{{ u.name }}</td>
+                            <td class="p-4 text-slate-500">{{ u.username }}</td>
+                            <td class="p-4 text-slate-600">{{ u.class_name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
